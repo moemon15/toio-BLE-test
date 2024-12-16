@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>toio BLEデータ送信テスト</title>
+</head>
+
+<body>
+    <h1>toio BLEデータ送信テスト</h1>
+
+    <div class="button-container">
+        <button id="connectBtn" class="button connect">toioに接続</button>
+        <button id="disconnectBtn" class="button" disabled>切断</button>
+    </div>
+
+    <div id="status"></div>
+
+    <div class="coordinate-container">
+        <div id="coordinatesContainer">
+            <div class="coordinate-input">
+                <label for="x1">X座標:</label>
+                <input type="number" id="x1" placeholder="X" min="0" max="65535">
+                <label for="y1">Y座標:</label>
+                <input type="number" id="y1" placeholder="Y" min="0" max="65535">
+                <label for="angle1">角度:</label>
+                <input type="number" id="angle1" placeholder="角度" min="0" max="65535">
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button id="addCoordinateBtn" class="button">座標を追加</button>
+            <button id="removeCoordinateBtn" class="button">座標を削除</button>
+            <button id="sendDataBtn" class="button" disabled>データ送信</button>
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stats-card">
+            <div class="stats-title">データサイズ</div>
+            <div class="stats-value" id="dataSize">0 バイト</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-title">座標数</div>
+            <div class="stats-value" id="coordinateCount">1</div>
+        </div>
+    </div>
+
+    <script src="./main.js"></script>
+</body>
+
+</html>
