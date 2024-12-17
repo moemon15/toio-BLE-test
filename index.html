@@ -48,6 +48,29 @@
         </div>
     </div>
 
+    <div class="data-preview-container">
+        <div class="data-preview-card">
+            <div class="data-preview-title">送信データ解析</div>
+            <div class="data-tabs">
+                <button class="tab-button active" data-tab="raw">生データ</button>
+                <button class="tab-button" data-tab="parsed">解析データ</button>
+            </div>
+            <div class="data-preview-content active" id="rawDataPreview">
+                <div class="data-row">
+                    <span class="data-label">Header:</span>
+                    <span class="data-bytes" id="headerBytes"></span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Coordinates:</span>
+                    <span class="data-bytes" id="coordinateBytes"></span>
+                </div>
+            </div>
+            <div class="data-preview-content" id="parsedDataPreview">
+                <div class="parsed-data" id="parsedData"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="./main.js"></script>
 </body>
 

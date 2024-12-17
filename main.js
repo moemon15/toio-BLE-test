@@ -8,6 +8,7 @@ class ToioBLEController {
 
         this.initializeElements();
         this.attachEventListeners();
+        this.initializeTabs();
     }
 
     initializeElements() {
@@ -28,6 +29,26 @@ class ToioBLEController {
         this.sendDataBtn.addEventListener('click', () => this.sendData());
         this.addCoordinateBtn.addEventListener('click', () => this.addCoordinateInput());
         this.removeCoordinateBtn.addEventListener('click', () => this.removeCoordinateInput());
+    }
+
+    initializeTabs() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const tabId = button.getAttribute('data-tab');
+                document.querySelectorAll('.data-preview-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                if (tabId === 'raw') {
+                    document.getElementById('rawDataPreview').classList.add('active');
+                } else {
+                    document.getElementById('parsedDataPreview').classList.add('active');
+                }
+            });
+        });
     }
 
     async connect() {
@@ -104,6 +125,8 @@ class ToioBLEController {
             data.push(angle & 0xFF, (angle >> 8) & 0xFF);
         }
 
+        this.updateDataPreview(data);
+
         return data;
     }
 
@@ -144,6 +167,94 @@ class ToioBLEController {
             this.coordinatesContainer.removeChild(inputs[inputs.length - 1]);
             this.coordinateCountDiv.textContent = inputs.length - 1;
         }
+    }
+
+    updateDataPreview(data) {
+        // 生データの更新
+        const headerBytes = document.getElementById('headerBytes');
+        const coordinateBytes = document.getElementById('coordinateBytes');
+
+        const header = data.slice(0, 8);
+        const coordinates = data.slice(8);
+
+        headerBytes.textContent = this.formatBytes(header);
+        coordinateBytes.textContent = this.formatBytes(coordinates);
+
+        // 解析データの更新
+        const parsedData = document.getElementById('parsedData');
+        parsedData.innerHTML = this.generateParsedDataHTML(data);
+    }
+
+    formatBytes(bytes) {
+        return Array.from(bytes)
+            .map(byte => '0x' + byte.toString(16).padStart(2, '0'))
+            .join(' ');
+    }
+
+    generateParsedDataHTML(data) {
+        const controlTypes = {
+            0x04: '複数目標指定付きモーター制御'
+        };
+
+        const moveTypes = {
+            0x00: '回転しながら移動',
+            0x02: '回転しながら移動'
+        };
+
+        const speedChangeTypes = {
+            0x00: '速度一定'
+        };
+
+        const writeTypes = {
+            0x00: '上書き',
+            0x01: '追加'
+        };
+
+        let html = `
+            <div class="field">
+                <span class="field-name">制御の種類:</span> ${controlTypes[data[0]] || `不明(0x${data[0].toString(16)})`}
+            </div>
+            <div class="field">
+                <span class="field-name">制御識別値:</span> ${data[1]}
+            </div>
+            <div class="field">
+                <span class="field-name">タイムアウト時間:</span> ${data[2]}秒
+            </div>
+            <div class="field">
+                <span class="field-name">移動タイプ:</span> ${moveTypes[data[3]] || `不明(0x${data[3].toString(16)})`}
+            </div>
+            <div class="field">
+                <span class="field-name">最大速度:</span> ${data[4]}
+            </div>
+            <div class="field">
+                <span class="field-name">速度変化タイプ:</span> ${speedChangeTypes[data[5]] || `不明(0x${data[5].toString(16)})`}
+            </div>
+            <div class="field">
+                <span class="field-name">書き込み操作:</span> ${writeTypes[data[7]] || `不明(0x${data[7].toString(16)})`}
+            </div>
+        `;
+
+        // 座標データの解析
+        const coordData = data.slice(8);
+        const coordCount = coordData.length / 6;
+
+        for (let i = 0; i < coordCount; i++) {
+            const offset = i * 6;
+            const x = coordData[offset] | (coordData[offset + 1] << 8);
+            const y = coordData[offset + 2] | (coordData[offset + 3] << 8);
+            const angle = coordData[offset + 4] | (coordData[offset + 5] << 8);
+
+            html += `
+                <div class="coordinate-point">
+                    <div class="field">目標地点 ${i + 1}</div>
+                    <div class="field">X座標: ${x}</div>
+                    <div class="field">Y座標: ${y}</div>
+                    <div class="field">角度: ${angle}度</div>
+                </div>
+            `;
+        }
+
+        return html;
     }
 }
 
